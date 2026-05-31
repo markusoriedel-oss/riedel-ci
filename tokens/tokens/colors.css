@@ -1,0 +1,14 @@
+:root {
+    /* Riedel CI Farben 2026 */
+    --color-navy-deep:    #00102a;
+    --color-navy:         #1c2e4c;
+    --color-dark:         #1a1a1a;
+    --color-dark-gray:    #2e2e2e;
+    --color-bronze:       #574d41;
+    --color-beige-dark:   #786b5a;
+    --color-beige-medium: #a0927e;
+    --color-beige-light:  #d2c6b1;
+    --color-cream:        #f2eeea;
+    --color-white:        #ffffff;
+    --color-accent:       #eb5d49;
+}
