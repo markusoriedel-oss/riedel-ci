@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ferien 26/27">
+<title>Ferien Bayern 26/27</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    background: #f5f2ee;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* Header */
+  .header {
+    background: #00102a;
+    padding: 52px 16px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .header-sub  { font-size: 10px; letter-spacing: 2px; color: #786b5a; text-transform: uppercase; margin-bottom: 3px; }
+  .header-title { font-size: 18px; font-weight: 300; color: #f2eeea; }
+  .legend { display: flex; gap: 14px; margin-top: 9px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #a0927e; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  /* Monate */
+  .months { padding: 12px 10px 0; }
+  .month-card { background: #fff; border-radius: 10px; margin-bottom: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+
+  .month-header {
+    background: #00102a;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .month-name { font-size: 13px; font-weight: 500; color: #f2eeea; letter-spacing: .5px; }
+  .plan-btn {
+    font-size: 10px; background: transparent; border: 1px solid #344;
+    color: #786b5a; border-radius: 4px; padding: 3px 7px; cursor: pointer;
+  }
+  .plan-btn.has-plan { color: #a0e0b0; border-color: #2d7a4f; }
+
+  .plan-bar { background: #f0faf4; border-bottom: 1px solid #d4edda; padding: 6px 12px; font-size: 11px; color: #155724; }
+
+  /* Kalender-Grid */
+  .dow-row {
+    display: grid; grid-template-columns: repeat(7,1fr);
+    background: #f5f2ee;
+  }
+  .dow-cell { text-align: center; font-size: 9px; font-weight: 500; color: #999; padding: 4px 0; letter-spacing: .5px; }
+  .dow-cell.we { color: #ccc; }
+
+  .week-row { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #f0ede8; }
+  .day-cell { text-align: center; padding: 5px 2px; cursor: default; position: relative; min-height: 30px; }
+  .day-cell.clickable { cursor: pointer; }
+  .day-num { font-size: 12px; font-weight: 300; color: #1a1a1a; display: block; line-height: 1.2; }
+  .day-num.we { color: #bbb; }
+  .day-num.bold { font-weight: 600; }
+  .day-dot { width: 4px; height: 4px; border-radius: 50%; margin: 1px auto 0; }
+
+  .day-cell.ferien    { background: #d4edda; }
+  .day-cell.feiertag  { background: #f8d7da; }
+  .day-cell.schulfrei { background: #fff3cd; }
+
+  .day-cell.ferien    .day-num { color: #155724; }
+  .day-cell.feiertag  .day-num { color: #721c24; font-weight: 600; }
+  .day-cell.schulfrei .day-num { color: #856404; font-weight: 600; }
+
+  .dot-ferien    { background: #2d7a4f; }
+  .dot-feiertag  { background: #c0392b; }
+  .dot-schulfrei { background: #d4820a; }
+
+  /* Overlay */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.4); z-index: 200;
+    align-items: flex-end;
+  }
+  .overlay.active { display: flex; }
+  .sheet {
+    background: #fff; width: 100%; border-radius: 16px 16px 0 0;
+    padding: 20px 16px 40px;
+  }
+  .sheet-title { font-size: 13px; font-weight: 500; color: #00102a; margin-bottom: 12px; }
+  .sheet textarea {
+    width: 100%; border: 1px solid #d2c6b1; border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; font-family: inherit;
+    resize: none; outline: none; color: #1a1a1a;
+  }
+  .sheet-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-save {
+    flex: 1; background: #00102a; color: #fff; border: none;
+    border-radius: 8px; padding: 12px; font-size: 14px; cursor: pointer;
+  }
+  .btn-cancel {
+    flex: 1; background: #f5f2ee; color: #786b5a;
+    border: 1px solid #d2c6b1; border-radius: 8px;
+    padding: 12px; font-size: 14px; cursor: pointer;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    display: none; position: fixed; bottom: 80px;
+    left: 50%; transform: translateX(-50%);
+    background: #fff; border: 1px solid #d2c6b1; border-radius: 10px;
+    padding: 12px 16px; box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    z-index: 100; min-width: 220px; max-width: 300px;
+  }
+  .tooltip.active { display: block; }
+  .tooltip-label { font-size: 12px; font-weight: 500; color: #00102a; margin-bottom: 4px; }
+  .tooltip-plan  { font-size: 11px; color: #2d7a4f; margin-bottom: 8px; }
+  .tooltip-btn {
+    width: 100%; background: #00102a; color: #fff; border: none;
+    border-radius: 5px; padding: 8px; font-size: 11px; cursor: pointer;
+  }
+
+  .footer { text-align: center; font-size: 9px; color: #ccc; margin-top: 8px; padding: 0 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-sub">Bayern · Schuljahr 2026/27</div>
+  <div class="header-title">Ferien &amp; Feiertage</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#2d7a4f"></div>Schulferien</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#c0392b"></div>Feiertag</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d4820a"></div>Schulfrei</div>
+  </div>
+</div>
+
+<div class="months" id="months"></div>
+<div class="footer">Quelle: Bayerisches Kultusministerium · BayMBl. 2022 Nr. 747</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-label" id="tt-label"></div>
+  <div class="tooltip-plan" id="tt-plan"></div>
+  <button class="tooltip-btn" id="tt-btn">Plan eintragen</button>
+</div>
+
+<!-- Edit Sheet -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-title" id="sheet-title">Plan eintragen</div>
+    <textarea id="sheet-input" rows="3" placeholder="z.B. Mallorca mit der Familie 🏖️"></textarea>
+    <div class="sheet-btns">
+      <button class="btn-save" id="btn-save">Speichern</button>
+      <button class="btn-cancel" id="btn-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS = [
+  { key:"2026-9",  name:"Sep 2026", days:[{d:1,w:1},{d:2,w:2},{d:3,w:3},{d:4,w:4},{d:5,w:5},{d:6,w:6},{d:7,w:0},{d:8,w:1},{d:9,w:2},{d:10,w:3},{d:11,w:4},{d:12,w:5},{d:13,w:6},{d:14,w:0},{d:15,w:1},{d:16,w:2},{d:17,w:3},{d:18,w:4},{d:19,w:5},{d:20,w:6},{d:21,w:0},{d:22,w:1},{d:23,w:2},{d:24,w:3},{d:25,w:4},{d:26,w:5},{d:27,w:6},{d:28,w:0},{d:29,w:1},{d:30,w:2}]},
+  { key:"2026-10", name:"Okt 2026", days:[{d:1,w:3},{d:2,w:4},{d:3,w:5},{d:4,w:6},{d:5,w:0},{d:6,w:1},{d:7,w:2},{d:8,w:3},{d:9,w:4},{d:10,w:5},{d:11,w:6},{d:12,w:0},{d:13,w:1},{d:14,w:2},{d:15,w:3},{d:16,w:4},{d:17,w:5},{d:18,w:6},{d:19,w:0},{d:20,w:1},{d:21,w:2},{d:22,w:3},{d:23,w:4},{d:24,w:5},{d:25,w:6},{d:26,w:0},{d:27,w:1},{d:28,w:2},{d:29,w:3},{d:30,w:4},{d:31,w:5}]},
+  { key:"2026-11", name:"Nov 2026", days:[{d:1,w:6,t:"feiertag",l:"Allerheiligen"},{d:2,w:0,t:"ferien",l:"Herbstferien"},{d:3,w:1,t:"ferien",l:"Herbstferien"},{d:4,w:2,t:"ferien",l:"Herbstferien"},{d:5,w:3,t:"ferien",l:"Herbstferien"},{d:6,w:4,t:"ferien",l:"Herbstferien"},{d:7,w:5},{d:8,w:6},{d:9,w:0},{d:10,w:1},{d:11,w:2},{d:12,w:3},{d:13,w:4},{d:14,w:5},{d:15,w:6},{d:16,w:0},{d:17,w:1},{d:18,w:2,t:"schulfrei",l:"Buß- u. Bettag"},{d:19,w:3},{d:20,w:4},{d:21,w:5},{d:22,w:6},{d:23,w:0},{d:24,w:1},{d:25,w:2},{d:26,w:3},{d:27,w:4},{d:28,w:5},{d:29,w:6},{d:30,w:0}]},
+  { key:"2026-12", name:"Dez 2026", days:[{d:1,w:1},{d:2,w:2},{d:3,w:3},{d:4,w:4},{d:5,w:5},{d:6,w:6},{d:7,w:0},{d:8,w:1},{d:9,w:2},{d:10,w:3},{d:11,w:4},{d:12,w:5},{d:13,w:6},{d:14,w:0},{d:15,w:1},{d:16,w:2},{d:17,w:3},{d:18,w:4},{d:19,w:5},{d:20,w:6},{d:21,w:0},{d:22,w:1},{d:23,w:2},{d:24,w:3,t:"ferien",l:"Weihnachtsferien"},{d:25,w:4,t:"feiertag",l:"1. Weihnachtstag"},{d:26,w:5,t:"feiertag",l:"2. Weihnachtstag"},{d:27,w:6,t:"ferien",l:"Weihnachtsferien"},{d:28,w:0,t:"ferien",l:"Weihnachtsferien"},{d:29,w:1,t:"ferien",l:"Weihnachtsferien"},{d:30,w:2,t:"ferien",l:"Weihnachtsferien"},{d:31,w:3,t:"ferien",l:"Weihnachtsferien"}]},
+  { key:"2027-1",  name:"Jan 2027", days:[{d:1,w:4,t:"feiertag",l:"Neujahr"},{d:2,w:5,t:"ferien",l:"Weihnachtsferien"},{d:3,w:6,t:"ferien",l:"Weihnachtsferien"},{d:4,w:0,t:"ferien",l:"Weihnachtsferien"},{d:5,w:1,t:"ferien",l:"Weihnachtsferien"},{d:6,w:2,t:"feiertag",l:"Hl. Drei Könige"},{d:7,w:3,t:"ferien",l:"Weihnachtsferien"},{d:8,w:4,t:"ferien",l:"Weihnachtsferien"},{d:9,w:5},{d:10,w:6},{d:11,w:0},{d:12,w:1},{d:13,w:2},{d:14,w:3},{d:15,w:4},{d:16,w:5},{d:17,w:6},{d:18,w:0},{d:19,w:1},{d:20,w:2},{d:21,w:3},{d:22,w:4},{d:23,w:5},{d:24,w:6},{d:25,w:0},{d:26,w:1},{d:27,w:2},{d:28,w:3},{d:29,w:4},{d:30,w:5},{d:31,w:6}]},
+  { key:"2027-2",  name:"Feb 2027", days:[{d:1,w:0},{d:2,w:1},{d:3,w:2},{d:4,w:3},{d:5,w:4},{d:6,w:5},{d:7,w:6},{d:8,w:0,t:"ferien",l:"Frühjahrsferien"},{d:9,w:1,t:"ferien",l:"Frühjahrsferien"},{d:10,w:2,t:"ferien",l:"Frühjahrsferien"},{d:11,w:3,t:"ferien",l:"Frühjahrsferien"},{d:12,w:4,t:"ferien",l:"Frühjahrsferien"},{d:13,w:5},{d:14,w:6},{d:15,w:0},{d:16,w:1},{d:17,w:2},{d:18,w:3},{d:19,w:4},{d:20,w:5},{d:21,w:6},{d:22,w:0},{d:23,w:1},{d:24,w:2},{d:25,w:3},{d:26,w:4},{d:27,w:5},{d:28,w:6}]},
+  { key:"2027-3",  name:"Mär 2027", days:[{d:1,w:0},{d:2,w:1},{d:3,w:2},{d:4,w:3},{d:5,w:4},{d:6,w:5},{d:7,w:6},{d:8,w:0},{d:9,w:1},{d:10,w:2},{d:11,w:3},{d:12,w:4},{d:13,w:5},{d:14,w:6},{d:15,w:0},{d:16,w:1},{d:17,w:2},{d:18,w:3},{d:19,w:4},{d:20,w:5},{d:21,w:6},{d:22,w:0,t:"ferien",l:"Osterferien"},{d:23,w:1,t:"ferien",l:"Osterferien"},{d:24,w:2,t:"ferien",l:"Osterferien"},{d:25,w:3,t:"ferien",l:"Osterferien"},{d:26,w:4,t:"ferien",l:"Osterferien"},{d:27,w:5,t:"ferien",l:"Osterferien"},{d:28,w:6,t:"ferien",l:"Osterferien"},{d:29,w:0,t:"ferien",l:"Osterferien"},{d:30,w:1,t:"ferien",l:"Osterferien"},{d:31,w:2,t:"ferien",l:"Osterferien"}]},
+  { key:"2027-4",  name:"Apr 2027", days:[{d:1,w:3,t:"ferien",l:"Osterferien"},{d:2,w:4,t:"feiertag",l:"Karfreitag"},{d:3,w:5},{d:4,w:6},{d:5,w:0,t:"feiertag",l:"Ostermontag"},{d:6,w:1},{d:7,w:2},{d:8,w:3},{d:9,w:4},{d:10,w:5},{d:11,w:6},{d:12,w:0},{d:13,w:1},{d:14,w:2},{d:15,w:3},{d:16,w:4},{d:17,w:5},{d:18,w:6},{d:19,w:0},{d:20,w:1},{d:21,w:2},{d:22,w:3},{d:23,w:4},{d:24,w:5},{d:25,w:6},{d:26,w:0},{d:27,w:1},{d:28,w:2},{d:29,w:3},{d:30,w:4}]},
+  { key:"2027-5",  name:"Mai 2027", days:[{d:1,w:5,t:"feiertag",l:"Tag der Arbeit"},{d:2,w:6},{d:3,w:0},{d:4,w:1},{d:5,w:2},{d:6,w:3,t:"feiertag",l:"Chr. Himmelfahrt"},{d:7,w:4},{d:8,w:5},{d:9,w:6},{d:10,w:0},{d:11,w:1},{d:12,w:2},{d:13,w:3},{d:14,w:4},{d:15,w:5},{d:16,w:6},{d:17,w:0,t:"feiertag",l:"Pfingstmontag"},{d:18,w:1,t:"ferien",l:"Pfingstferien"},{d:19,w:2,t:"ferien",l:"Pfingstferien"},{d:20,w:3,t:"ferien",l:"Pfingstferien"},{d:21,w:4,t:"ferien",l:"Pfingstferien"},{d:22,w:5,t:"ferien",l:"Pfingstferien"},{d:23,w:6,t:"ferien",l:"Pfingstferien"},{d:24,w:0,t:"ferien",l:"Pfingstferien"},{d:25,w:1,t:"ferien",l:"Pfingstferien"},{d:26,w:2,t:"ferien",l:"Pfingstferien"},{d:27,w:3,t:"feiertag",l:"Fronleichnam"},{d:28,w:4,t:"ferien",l:"Pfingstferien"},{d:29,w:5},{d:30,w:6},{d:31,w:0}]},
+  { key:"2027-6",  name:"Jun 2027", days:[{d:1,w:1},{d:2,w:2},{d:3,w:3},{d:4,w:4},{d:5,w:5},{d:6,w:6},{d:7,w:0},{d:8,w:1},{d:9,w:2},{d:10,w:3},{d:11,w:4},{d:12,w:5},{d:13,w:6},{d:14,w:0},{d:15,w:1},{d:16,w:2},{d:17,w:3},{d:18,w:4},{d:19,w:5},{d:20,w:6},{d:21,w:0},{d:22,w:1},{d:23,w:2},{d:24,w:3},{d:25,w:4},{d:26,w:5},{d:27,w:6},{d:28,w:0},{d:29,w:1},{d:30,w:2}]},
+  { key:"2027-7",  name:"Jul 2027", days:[{d:1,w:3},{d:2,w:4},{d:3,w:5},{d:4,w:6},{d:5,w:0},{d:6,w:1},{d:7,w:2},{d:8,w:3},{d:9,w:4},{d:10,w:5},{d:11,w:6},{d:12,w:0},{d:13,w:1},{d:14,w:2},{d:15,w:3},{d:16,w:4},{d:17,w:5},{d:18,w:6},{d:19,w:0},{d:20,w:1},{d:21,w:2},{d:22,w:3},{d:23,w:4},{d:24,w:5},{d:25,w:6},{d:26,w:0},{d:27,w:1},{d:28,w:2},{d:29,w:3},{d:30,w:4},{d:31,w:5}]},
+  { key:"2027-8",  name:"Aug 2027", days:[{d:1,w:6},{d:2,w:0,t:"ferien",l:"Sommerferien"},{d:3,w:1,t:"ferien",l:"Sommerferien"},{d:4,w:2,t:"ferien",l:"Sommerferien"},{d:5,w:3,t:"ferien",l:"Sommerferien"},{d:6,w:4,t:"ferien",l:"Sommerferien"},{d:7,w:5,t:"ferien",l:"Sommerferien"},{d:8,w:6,t:"ferien",l:"Sommerferien"},{d:9,w:0,t:"ferien",l:"Sommerferien"},{d:10,w:1,t:"ferien",l:"Sommerferien"},{d:11,w:2,t:"ferien",l:"Sommerferien"},{d:12,w:3,t:"ferien",l:"Sommerferien"},{d:13,w:4,t:"ferien",l:"Sommerferien"},{d:14,w:5,t:"ferien",l:"Sommerferien"},{d:15,w:6,t:"feiertag",l:"Mariä Himmelfahrt"},{d:16,w:0,t:"ferien",l:"Sommerferien"},{d:17,w:1,t:"ferien",l:"Sommerferien"},{d:18,w:2,t:"ferien",l:"Sommerferien"},{d:19,w:3,t:"ferien",l:"Sommerferien"},{d:20,w:4,t:"ferien",l:"Sommerferien"},{d:21,w:5,t:"ferien",l:"Sommerferien"},{d:22,w:6,t:"ferien",l:"Sommerferien"},{d:23,w:0,t:"ferien",l:"Sommerferien"},{d:24,w:1,t:"ferien",l:"Sommerferien"},{d:25,w:2,t:"ferien",l:"Sommerferien"},{d:26,w:3,t:"ferien",l:"Sommerferien"},{d:27,w:4,t:"ferien",l:"Sommerferien"},{d:28,w:5,t:"ferien",l:"Sommerferien"},{d:29,w:6,t:"ferien",l:"Sommerferien"},{d:30,w:0,t:"ferien",l:"Sommerferien"},{d:31,w:1,t:"ferien",l:"Sommerferien"}]},
+  { key:"2027-9",  name:"Sep 2027", days:[{d:1,w:2,t:"ferien",l:"Sommerferien"},{d:2,w:3,t:"ferien",l:"Sommerferien"},{d:3,w:4,t:"ferien",l:"Sommerferien"},{d:4,w:5,t:"ferien",l:"Sommerferien"},{d:5,w:6,t:"ferien",l:"Sommerferien"},{d:6,w:0,t:"ferien",l:"Sommerferien"},{d:7,w:1,t:"ferien",l:"Sommerferien"},{d:8,w:2,t:"ferien",l:"Sommerferien"},{d:9,w:3,t:"ferien",l:"Sommerferien"},{d:10,w:4,t:"ferien",l:"Sommerferien"},{d:11,w:5,t:"ferien",l:"Sommerferien"},{d:12,w:6,t:"ferien",l:"Sommerferien"},{d:13,w:0,t:"ferien",l:"Sommerferien"},{d:14,w:1},{d:15,w:2},{d:16,w:3},{d:17,w:4},{d:18,w:5},{d:19,w:6},{d:20,w:0},{d:21,w:1},{d:22,w:2},{d:23,w:3},{d:24,w:4},{d:25,w:5},{d:26,w:6},{d:27,w:0},{d:28,w:1},{d:29,w:2},{d:30,w:3}]},
+  { key:"2027-10", name:"Okt 2027", days:[{d:1,w:4},{d:2,w:5},{d:3,w:6,t:"feiertag",l:"Tag d. Dt. Einheit"},{d:4,w:0},{d:5,w:1},{d:6,w:2},{d:7,w:3},{d:8,w:4},{d:9,w:5},{d:10,w:6},{d:11,w:0},{d:12,w:1},{d:13,w:2},{d:14,w:3},{d:15,w:4},{d:16,w:5},{d:17,w:6},{d:18,w:0},{d:19,w:1},{d:20,w:2},{d:21,w:3},{d:22,w:4},{d:23,w:5},{d:24,w:6},{d:25,w:0},{d:26,w:1},{d:27,w:2},{d:28,w:3},{d:29,w:4},{d:30,w:5},{d:31,w:6}]},
+  { key:"2027-11", name:"Nov 2027", days:[{d:1,w:0,t:"feiertag",l:"Allerheiligen"},{d:2,w:1,t:"ferien",l:"Herbstferien"},{d:3,w:2,t:"ferien",l:"Herbstferien"},{d:4,w:3,t:"ferien",l:"Herbstferien"},{d:5,w:4,t:"ferien",l:"Herbstferien"},{d:6,w:5},{d:7,w:6},{d:8,w:0},{d:9,w:1},{d:10,w:2},{d:11,w:3},{d:12,w:4},{d:13,w:5},{d:14,w:6},{d:15,w:0},{d:16,w:1},{d:17,w:2,t:"schulfrei",l:"Buß- u. Bettag"},{d:18,w:3},{d:19,w:4},{d:20,w:5},{d:21,w:6},{d:22,w:0},{d:23,w:1},{d:24,w:2},{d:25,w:3},{d:26,w:4},{d:27,w:5},{d:28,w:6},{d:29,w:0},{d:30,w:1}]},
+  { key:"2027-12", name:"Dez 2027", days:[{d:1,w:2},{d:2,w:3},{d:3,w:4},{d:4,w:5},{d:5,w:6},{d:6,w:0},{d:7,w:1},{d:8,w:2},{d:9,w:3},{d:10,w:4},{d:11,w:5},{d:12,w:6},{d:13,w:0},{d:14,w:1},{d:15,w:2},{d:16,w:3},{d:17,w:4},{d:18,w:5},{d:19,w:6},{d:20,w:0},{d:21,w:1},{d:22,w:2},{d:23,w:3},{d:24,w:4,t:"ferien",l:"Weihnachtsferien"},{d:25,w:5,t:"feiertag",l:"1. Weihnachtstag"},{d:26,w:6,t:"feiertag",l:"2. Weihnachtstag"},{d:27,w:0,t:"ferien",l:"Weihnachtsferien"},{d:28,w:1,t:"ferien",l:"Weihnachtsferien"},{d:29,w:2,t:"ferien",l:"Weihnachtsferien"},{d:30,w:3,t:"ferien",l:"Weihnachtsferien"},{d:31,w:4,t:"ferien",l:"Weihnachtsferien"}]},
+];
+
+const DOW = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+let plans = {};
+let activeTooltipKey = null;
+let editingKey = null;
+
+// Plans aus localStorage laden
+try { plans = JSON.parse(localStorage.getItem("ferienplan") || "{}"); } catch {}
+
+function savePlans() {
+  try { localStorage.setItem("ferienplan", JSON.stringify(plans)); } catch {}
+}
+
+function buildWeeks(days) {
+  const grid = [];
+  let week = new Array(7).fill(null);
+  days.forEach(day => {
+    week[day.w] = day;
+    if (day.w === 6) { grid.push([...week]); week = new Array(7).fill(null); }
+  });
+  if (week.some(x => x !== null)) grid.push(week);
+  return grid;
+}
+
+function renderMonths() {
+  const container = document.getElementById("months");
+  container.innerHTML = "";
+
+  MONTHS.forEach(({ key, name, days }) => {
+    const hasFerienOrFeiertag = days.some(d => d.t);
+    const plan = plans[key];
+    const weeks = buildWeeks(days);
+
+    const card = document.createElement("div");
+    card.className = "month-card";
+
+    // Header
+    const hdr = document.createElement("div");
+    hdr.className = "month-header";
+    hdr.innerHTML = `<span class="month-name">${name}</span>`;
+    if (hasFerienOrFeiertag) {
+      const btn = document.createElement("button");
+      btn.className = "plan-btn" + (plan ? " has-plan" : "");
+      btn.textContent = plan ? "✏️ Plan" : "+ Plan";
+      btn.onclick = (e) => { e.stopPropagation(); openEdit(key, name); };
+      hdr.appendChild(btn);
+    }
+    card.appendChild(hdr);
+
+    // Plan-Bar
+    if (plan) {
+      const bar = document.createElement("div");
+      bar.className = "plan-bar";
+      bar.textContent = "📌 " + plan;
+      card.appendChild(bar);
+    }
+
+    // DOW row
+    const dowRow = document.createElement("div");
+    dowRow.className = "dow-row";
+    DOW.forEach((d, i) => {
+      const cell = document.createElement("div");
+      cell.className = "dow-cell" + (i >= 5 ? " we" : "");
+      cell.textContent = d;
+      dowRow.appendChild(cell);
+    });
+    card.appendChild(dowRow);
+
+    // Weeks
+    weeks.forEach(week => {
+      const row = document.createElement("div");
+      row.className = "week-row";
+      week.forEach((day, di) => {
+        const cell = document.createElement("div");
+        if (!day) { cell.className = "day-cell"; row.appendChild(cell); return; }
+        const isWe = day.w >= 5;
+        cell.className = "day-cell" + (day.t ? " " + day.t : "") + (day.t ? " clickable" : "");
+        cell.innerHTML = `<span class="day-num${isWe && !day.t ? " we" : ""}${day.t === "feiertag" || day.t === "schulfrei" ? " bold" : ""}">${day.d}</span>`;
+        if (day.t) {
+          const dot = document.createElement("div");
+          dot.className = "day-dot dot-" + day.t;
+          cell.appendChild(dot);
+          cell.onclick = (e) => { e.stopPropagation(); showTooltip(day, key); };
+        }
+        row.appendChild(cell);
+      });
+      card.appendChild(row);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function showTooltip(day, key) {
+  activeTooltipKey = key;
+  const tt = document.getElementById("tooltip");
+  document.getElementById("tt-label").textContent = day.l;
+  const planEl = document.getElementById("tt-plan");
+  const plan = plans[key];
+  if (plan) { planEl.textContent = "📌 " + plan; planEl.style.display = "block"; }
+  else { planEl.style.display = "none"; }
+  document.getElementById("tt-btn").textContent = plan ? "Plan bearbeiten" : "Plan eintragen";
+  tt.classList.add("active");
+}
+
+document.getElementById("tt-btn").onclick = () => {
+  if (!activeTooltipKey) return;
+  const month = MONTHS.find(m => m.key === activeTooltipKey);
+  document.getElementById("tooltip").classList.remove("active");
+  openEdit(activeTooltipKey, month?.name || "");
+};
+
+function openEdit(key, name) {
+  editingKey = key;
+  document.getElementById("sheet-title").textContent = "Plan für " + name;
+  document.getElementById("sheet-input").value = plans[key] || "";
+  document.getElementById("overlay").classList.add("active");
+  setTimeout(() => document.getElementById("sheet-input").focus(), 100);
+}
+
+document.getElementById("btn-save").onclick = () => {
+  const val = document.getElementById("sheet-input").value.trim();
+  if (val) plans[editingKey] = val;
+  else delete plans[editingKey];
+  savePlans();
+  document.getElementById("overlay").classList.remove("active");
+  renderMonths();
+};
+
+document.getElementById("btn-cancel").onclick = () => {
+  document.getElementById("overlay").classList.remove("active");
+};
+
+document.addEventListener("click", () => {
+  document.getElementById("tooltip").classList.remove("active");
+  activeTooltipKey = null;
+});
+
+renderMonths();
+</script>
+</body>
+</html>
