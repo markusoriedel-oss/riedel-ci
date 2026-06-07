@@ -367,6 +367,10 @@ function setColor(c) {
 }
 
 function openNew(ds, type, label) {
+  // Wenn bereits ein Plan auf diesem Tag liegt → diesen bearbeiten
+  const existing = plansForDate(ds);
+  if (existing.length > 0) { openEdit(existing[0]); return; }
+
   editingId = null;
   document.getElementById("sheet-title").textContent = label ? label : "Eintrag planen";
   document.getElementById("input-desc").value = "";
