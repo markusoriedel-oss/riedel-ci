@@ -9,41 +9,36 @@
 <title>Ferien Bayern 26/27</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: -apple-system, 'Helvetica Neue', sans-serif;
-  background: #f5f2ee;
-  min-height: 100vh;
-  padding-bottom: 40px;
-}
-.header {
-  background: #00102a;
-  padding: 52px 16px 14px;
-  position: sticky; top: 0; z-index: 20;
-}
+body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #f5f2ee; min-height: 100vh; padding-bottom: 40px; }
+
+.header { background: #00102a; padding: 52px 16px 14px; position: sticky; top: 0; z-index: 20; }
 .header-sub { font-size: 10px; letter-spacing: 2px; color: #786b5a; text-transform: uppercase; margin-bottom: 3px; }
 .header-title { font-size: 18px; font-weight: 300; color: #f2eeea; }
 .legend { display: flex; gap: 12px; margin-top: 9px; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #a0927e; }
 .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
 
+/* Sync-Status */
+.sync-bar { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10px; color: #786b5a; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #786b5a; }
+.sync-dot.ok { background: #2d7a4f; }
+.sync-dot.err { background: #c0392b; }
+.sync-dot.loading { background: #d4820a; animation: pulse .8s infinite alternate; }
+@keyframes pulse { to { opacity: .3; } }
+
 .months { padding: 12px 10px 0; }
 .month-card { background: #fff; border-radius: 10px; margin-bottom: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
 .month-header { background: #00102a; padding: 8px 12px; }
 .month-name { font-size: 13px; font-weight: 500; color: #f2eeea; letter-spacing: .5px; }
 
-/* Plan-Einträge unter Monatsheader */
 .plan-entries { border-bottom: 1px solid #eee; }
-.plan-entry {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 12px; border-bottom: 1px solid #f5f2ee;
-  cursor: pointer;
-}
+.plan-entry { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #f5f2ee; cursor: pointer; }
 .plan-entry:last-child { border-bottom: none; }
 .plan-entry-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .plan-entry-text { flex: 1; }
 .plan-entry-dates { font-size: 10px; color: #999; }
 .plan-entry-label { font-size: 12px; color: #1a1a1a; margin-top: 1px; }
-.plan-entry-del { font-size: 16px; color: #ddd; padding: 0 4px; cursor: pointer; }
+.plan-entry-del { font-size: 18px; color: #ddd; padding: 0 4px; cursor: pointer; line-height: 1; }
 
 .dow-row { display: grid; grid-template-columns: repeat(7,1fr); background: #f5f2ee; }
 .dow-cell { text-align: center; font-size: 9px; font-weight: 500; color: #999; padding: 4px 0; letter-spacing: .5px; }
@@ -55,8 +50,8 @@ body {
 .day-num.we { color: #ccc; }
 .day-num.bold { font-weight: 600; }
 .day-dot { width: 4px; height: 4px; border-radius: 50%; margin: 1px auto 0; }
+.plan-bar-day { position: absolute; bottom: 2px; left: 1px; right: 1px; height: 3px; border-radius: 2px; }
 
-/* Kalender-Markierungen */
 .day-cell.ferien    { background: #d4edda; }
 .day-cell.feiertag  { background: #f8d7da; }
 .day-cell.schulfrei { background: #fff3cd; }
@@ -67,56 +62,25 @@ body {
 .dot-feiertag  { background: #c0392b; }
 .dot-schulfrei { background: #d4820a; }
 
-/* Plan-Farbbalken auf Tag */
-.plan-bar-day {
-  position: absolute; bottom: 2px; left: 1px; right: 1px;
-  height: 3px; border-radius: 2px;
-}
-
-/* Overlay / Sheet */
-.overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.45); z-index: 200; align-items: flex-end;
-}
+/* Sheet */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: flex-end; }
 .overlay.active { display: flex; }
-.sheet {
-  background: #fff; width: 100%;
-  border-radius: 16px 16px 0 0;
-  padding: 20px 16px 44px;
-  max-height: 90vh; overflow-y: auto;
-}
+.sheet { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 20px 16px 44px; max-height: 90vh; overflow-y: auto; }
 .sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
 .sheet-title { font-size: 15px; font-weight: 500; color: #00102a; margin-bottom: 16px; }
-
 .form-row { margin-bottom: 14px; }
 .form-label { font-size: 11px; color: #999; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 5px; display: block; }
-.form-input {
-  width: 100%; border: 1px solid #d2c6b1; border-radius: 8px;
-  padding: 10px 12px; font-size: 14px; font-family: inherit;
-  outline: none; color: #1a1a1a; background: #fff;
-  -webkit-appearance: none;
-}
+.form-input { width: 100%; border: 1px solid #d2c6b1; border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; color: #1a1a1a; background: #fff; -webkit-appearance: none; }
 .form-input:focus { border-color: #786b5a; }
 .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-/* Farbwahl */
 .color-row { display: flex; gap: 8px; margin-top: 4px; }
-.color-swatch {
-  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
-  border: 2px solid transparent; transition: transform .1s;
-}
+.color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .1s; }
 .color-swatch.selected { border-color: #00102a; transform: scale(1.15); }
-
 .sheet-btns { display: flex; gap: 8px; margin-top: 16px; }
-.btn-save {
-  flex: 1; background: #00102a; color: #fff; border: none;
-  border-radius: 8px; padding: 13px; font-size: 14px; cursor: pointer;
-}
-.btn-cancel {
-  flex: 1; background: #f5f2ee; color: #786b5a;
-  border: 1px solid #d2c6b1; border-radius: 8px;
-  padding: 13px; font-size: 14px; cursor: pointer;
-}
+.btn-save { flex: 1; background: #00102a; color: #fff; border: none; border-radius: 8px; padding: 13px; font-size: 14px; cursor: pointer; }
+.btn-save:disabled { background: #999; }
+.btn-cancel { flex: 1; background: #f5f2ee; color: #786b5a; border: 1px solid #d2c6b1; border-radius: 8px; padding: 13px; font-size: 14px; cursor: pointer; }
+
 .footer { text-align: center; font-size: 9px; color: #ccc; margin-top: 8px; padding: 0 10px; }
 </style>
 </head>
@@ -130,14 +94,17 @@ body {
     <div class="legend-item"><div class="legend-dot" style="background:#c0392b"></div>Feiertag</div>
     <div class="legend-item"><div class="legend-dot" style="background:#d4820a"></div>Schulfrei</div>
   </div>
+  <div class="sync-bar">
+    <div class="sync-dot loading" id="sync-dot"></div>
+    <span id="sync-label">Lade Pläne…</span>
+  </div>
 </div>
 
 <div class="months" id="months"></div>
 <div class="footer">Quelle: Bayerisches Kultusministerium · BayMBl. 2022 Nr. 747</div>
 
-<!-- Sheet -->
 <div class="overlay" id="overlay">
-  <div class="sheet" id="sheet">
+  <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title" id="sheet-title">Eintrag</div>
     <div class="form-row">
@@ -145,14 +112,8 @@ body {
       <input class="form-input" id="input-desc" type="text" placeholder="z.B. Mallorca 🏖️" autocomplete="off">
     </div>
     <div class="form-row date-row">
-      <div>
-        <label class="form-label">Von</label>
-        <input class="form-input" id="input-from" type="date">
-      </div>
-      <div>
-        <label class="form-label">Bis</label>
-        <input class="form-input" id="input-to" type="date">
-      </div>
+      <div><label class="form-label">Von</label><input class="form-input" id="input-from" type="date"></div>
+      <div><label class="form-label">Bis</label><input class="form-input" id="input-to" type="date"></div>
     </div>
     <div class="form-row">
       <label class="form-label">Farbe</label>
@@ -166,7 +127,10 @@ body {
 </div>
 
 <script>
-// ── Kalenderdaten ──────────────────────────────────────────────────────────
+const BIN_ID  = "6a255d7eda38895dfe949502";
+const API_KEY = "$2a$10$40rjCloVWjNDXEpp5poHluDy7/Tase71iKj5jIHGKUyYq869e99yW";
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
 const MONTHS = [
   { key:"2026-9",  name:"Sep 2026", days:[{d:1,w:1},{d:2,w:2},{d:3,w:3},{d:4,w:4},{d:5,w:5},{d:6,w:6},{d:7,w:0},{d:8,w:1},{d:9,w:2},{d:10,w:3},{d:11,w:4},{d:12,w:5},{d:13,w:6},{d:14,w:0},{d:15,w:1},{d:16,w:2},{d:17,w:3},{d:18,w:4},{d:19,w:5},{d:20,w:6},{d:21,w:0},{d:22,w:1},{d:23,w:2},{d:24,w:3},{d:25,w:4},{d:26,w:5},{d:27,w:6},{d:28,w:0},{d:29,w:1},{d:30,w:2}]},
   { key:"2026-10", name:"Okt 2026", days:[{d:1,w:3},{d:2,w:4},{d:3,w:5},{d:4,w:6},{d:5,w:0},{d:6,w:1},{d:7,w:2},{d:8,w:3},{d:9,w:4},{d:10,w:5},{d:11,w:6},{d:12,w:0},{d:13,w:1},{d:14,w:2},{d:15,w:3},{d:16,w:4},{d:17,w:5},{d:18,w:6},{d:19,w:0},{d:20,w:1},{d:21,w:2},{d:22,w:3},{d:23,w:4},{d:24,w:5},{d:25,w:6},{d:26,w:0},{d:27,w:1},{d:28,w:2},{d:29,w:3},{d:30,w:4},{d:31,w:5}]},
@@ -186,41 +150,82 @@ const MONTHS = [
   { key:"2027-12", name:"Dez 2027", days:[{d:1,w:2},{d:2,w:3},{d:3,w:4},{d:4,w:5},{d:5,w:6},{d:6,w:0},{d:7,w:1},{d:8,w:2},{d:9,w:3},{d:10,w:4},{d:11,w:5},{d:12,w:6},{d:13,w:0},{d:14,w:1},{d:15,w:2},{d:16,w:3},{d:17,w:4},{d:18,w:5},{d:19,w:6},{d:20,w:0},{d:21,w:1},{d:22,w:2},{d:23,w:3},{d:24,w:4,t:"ferien",l:"Weihnachtsferien"},{d:25,w:5,t:"feiertag",l:"1. Weihnachtstag"},{d:26,w:6,t:"feiertag",l:"2. Weihnachtstag"},{d:27,w:0,t:"ferien",l:"Weihnachtsferien"},{d:28,w:1,t:"ferien",l:"Weihnachtsferien"},{d:29,w:2,t:"ferien",l:"Weihnachtsferien"},{d:30,w:3,t:"ferien",l:"Weihnachtsferien"},{d:31,w:4,t:"ferien",l:"Weihnachtsferien"}]},
 ];
 
-// Ferienblock-Lookup: Datum (YYYY-MM-DD) → Block-Name + Start/End
 const FERIEN_BLOCKS = [
-  { name:"Herbstferien 2026",     from:"2026-11-01", to:"2026-11-06" },
-  { name:"Weihnachtsferien 26/27",from:"2026-12-24", to:"2027-01-08" },
-  { name:"Frühjahrsferien 2027",  from:"2027-02-08", to:"2027-02-12" },
-  { name:"Osterferien 2027",      from:"2027-03-22", to:"2027-04-02" },
-  { name:"Chr. Himmelfahrt",      from:"2027-05-06", to:"2027-05-06" },
-  { name:"Pfingstferien 2027",    from:"2027-05-17", to:"2027-05-28" },
-  { name:"Sommerferien 2027",     from:"2027-08-02", to:"2027-09-13" },
-  { name:"Herbstferien 2027",     from:"2027-11-01", to:"2027-11-05" },
-  { name:"Weihnachtsferien 2027", from:"2027-12-24", to:"2028-01-09" },
+  { name:"Herbstferien 2026",      from:"2026-11-01", to:"2026-11-06" },
+  { name:"Weihnachtsferien 26/27", from:"2026-12-24", to:"2027-01-08" },
+  { name:"Frühjahrsferien 2027",   from:"2027-02-08", to:"2027-02-12" },
+  { name:"Osterferien 2027",       from:"2027-03-22", to:"2027-04-02" },
+  { name:"Chr. Himmelfahrt",       from:"2027-05-06", to:"2027-05-06" },
+  { name:"Pfingstferien 2027",     from:"2027-05-17", to:"2027-05-28" },
+  { name:"Sommerferien 2027",      from:"2027-08-02", to:"2027-09-13" },
+  { name:"Herbstferien 2027",      from:"2027-11-01", to:"2027-11-05" },
+  { name:"Weihnachtsferien 2027",  from:"2027-12-24", to:"2028-01-09" },
 ];
 
 const PLAN_COLORS = ["#e67e22","#2980b9","#8e44ad","#27ae60","#c0392b","#16a085"];
-
-// ── Pläne – werden durch Claude direkt hier eingebettet ────────────────────
 let PLANS = [];
-// PLANS_PLACEHOLDER
+let isSaving = false;
 
-// ── Hilfsfunktionen ────────────────────────────────────────────────────────
-function dateStr(year, month, day) {
-  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+// ── JSONbin ────────────────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const dot = document.getElementById("sync-dot");
+  const lbl = document.getElementById("sync-label");
+  dot.className = "sync-dot " + state;
+  lbl.textContent = text;
 }
 
+async function loadPlans() {
+  setSyncStatus("loading", "Lade Pläne…");
+  try {
+    const res = await fetch(BIN_URL + "/latest", {
+      headers: { "X-Access-Key": API_KEY }
+    });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    PLANS = data.record.plans || [];
+    setSyncStatus("ok", "Synchronisiert");
+    renderMonths();
+  } catch (e) {
+    setSyncStatus("err", "Offline – Pläne nicht geladen");
+    renderMonths();
+  }
+}
+
+async function savePlans() {
+  if (isSaving) return;
+  isSaving = true;
+  setSyncStatus("loading", "Speichert…");
+  try {
+    const res = await fetch(BIN_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Key": API_KEY
+      },
+      body: JSON.stringify({ plans: PLANS })
+    });
+    if (!res.ok) throw new Error(res.status);
+    setSyncStatus("ok", "Gespeichert ✓");
+  } catch (e) {
+    setSyncStatus("err", "Fehler beim Speichern");
+  } finally {
+    isSaving = false;
+  }
+}
+
+// ── Hilfsfunktionen ────────────────────────────────────────────────────────
+function dateStr(y, m, d) {
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
 function blockForDate(ds) {
   return FERIEN_BLOCKS.find(b => ds >= b.from && ds <= b.to) || null;
 }
-
 function plansForDate(ds) {
   return PLANS.filter(p => ds >= p.from && ds <= p.to);
 }
-
-function plansForMonth(mkey) {
-  const [y, m] = mkey.split('-').map(Number);
-  const mo = MONTHS.find(x => x.key === mkey);
+function plansForMonth(key) {
+  const [y, m] = key.split('-').map(Number);
+  const mo = MONTHS.find(x => x.key === key);
   if (!mo) return [];
   const seen = new Set();
   const result = [];
@@ -228,17 +233,14 @@ function plansForMonth(mkey) {
     const ds = dateStr(y, m, day.d);
     PLANS.forEach(p => {
       if (ds >= p.from && ds <= p.to && !seen.has(p.id)) {
-        seen.add(p.id);
-        result.push(p);
+        seen.add(p.id); result.push(p);
       }
     });
   });
   return result;
 }
-
 function buildWeeks(days) {
-  const grid = [];
-  let week = new Array(7).fill(null);
+  const grid = []; let week = new Array(7).fill(null);
   days.forEach(day => {
     week[day.w] = day;
     if (day.w === 6) { grid.push([...week]); week = new Array(7).fill(null); }
@@ -246,7 +248,6 @@ function buildWeeks(days) {
   if (week.some(x => x !== null)) grid.push(week);
   return grid;
 }
-
 function fmtDate(ds) {
   if (!ds) return '';
   const [y,m,d] = ds.split('-');
@@ -257,22 +258,18 @@ function fmtDate(ds) {
 function renderMonths() {
   const container = document.getElementById("months");
   container.innerHTML = "";
-
   MONTHS.forEach(({ key, name, days }) => {
     const [y, m] = key.split('-').map(Number);
     const weeks = buildWeeks(days);
     const monthPlans = plansForMonth(key);
-
     const card = document.createElement("div");
     card.className = "month-card";
 
-    // Header
     const hdr = document.createElement("div");
     hdr.className = "month-header";
     hdr.innerHTML = `<span class="month-name">${name}</span>`;
     card.appendChild(hdr);
 
-    // Plan-Einträge
     if (monthPlans.length > 0) {
       const pe = document.createElement("div");
       pe.className = "plan-entries";
@@ -286,17 +283,13 @@ function renderMonths() {
             <div class="plan-entry-label">${p.desc}</div>
           </div>
           <div class="plan-entry-del" data-id="${p.id}">×</div>`;
-        row.querySelector('.plan-entry-del').onclick = (e) => {
-          e.stopPropagation();
-          deletePlan(p.id);
-        };
+        row.querySelector('.plan-entry-del').onclick = e => { e.stopPropagation(); deletePlan(p.id); };
         row.onclick = () => openEdit(p);
         pe.appendChild(row);
       });
       card.appendChild(pe);
     }
 
-    // DOW
     const dowRow = document.createElement("div");
     dowRow.className = "dow-row";
     ["Mo","Di","Mi","Do","Fr","Sa","So"].forEach((d, i) => {
@@ -307,30 +300,23 @@ function renderMonths() {
     });
     card.appendChild(dowRow);
 
-    // Wochen
     weeks.forEach(week => {
       const row = document.createElement("div");
       row.className = "week-row";
-      week.forEach((day) => {
+      week.forEach(day => {
         const cell = document.createElement("div");
         if (!day) { cell.className = "day-cell"; row.appendChild(cell); return; }
         const isWe = day.w >= 5;
         const ds = dateStr(y, m, day.d);
         cell.className = "day-cell" + (day.t ? " " + day.t : "");
-        cell.innerHTML = `<span class="day-num${isWe && !day.t ? " we" : ""}${day.t === "feiertag" || day.t === "schulfrei" ? " bold" : ""}">${day.d}</span>`;
-
-        // Plan-Farbbalken
+        cell.innerHTML = `<span class="day-num${isWe && !day.t ? " we" : ""}${day.t==="feiertag"||day.t==="schulfrei" ? " bold" : ""}">${day.d}</span>`;
         const dayPlans = plansForDate(ds);
         if (dayPlans.length > 0) {
           const bar = document.createElement("div");
           bar.className = "plan-bar-day";
           bar.style.background = dayPlans[0].color;
-          if (dayPlans.length > 1) {
-            bar.style.background = `linear-gradient(to right, ${dayPlans.map(p=>p.color).join(', ')})`;
-          }
           cell.appendChild(bar);
         }
-
         cell.onclick = () => openNew(ds, day.t, day.l);
         row.appendChild(cell);
       });
@@ -341,11 +327,10 @@ function renderMonths() {
   });
 }
 
-// ── Sheet-Logik ────────────────────────────────────────────────────────────
+// ── Sheet ──────────────────────────────────────────────────────────────────
 let editingId = null;
 let selectedColor = PLAN_COLORS[0];
 
-// Farb-Swatches aufbauen
 const colorRow = document.getElementById("color-row");
 PLAN_COLORS.forEach((c, i) => {
   const sw = document.createElement("div");
@@ -362,24 +347,19 @@ PLAN_COLORS.forEach((c, i) => {
 function setColor(c) {
   selectedColor = c;
   document.querySelectorAll('.color-swatch').forEach(sw => {
-    sw.classList.toggle('selected', sw.style.background === c || sw.style.backgroundColor === c);
+    sw.classList.toggle('selected', sw.style.backgroundColor === c || sw.style.background === c);
   });
 }
 
 function openNew(ds, type, label) {
-  // Wenn bereits ein Plan auf diesem Tag liegt → diesen bearbeiten
   const existing = plansForDate(ds);
   if (existing.length > 0) { openEdit(existing[0]); return; }
-
   editingId = null;
-  document.getElementById("sheet-title").textContent = label ? label : "Eintrag planen";
+  document.getElementById("sheet-title").textContent = label || "Eintrag planen";
   document.getElementById("input-desc").value = "";
-
-  // Von/Bis automatisch auf Ferienblock setzen
   const block = blockForDate(ds);
   document.getElementById("input-from").value = block ? block.from : ds;
   document.getElementById("input-to").value   = block ? block.to   : ds;
-
   setColor(PLAN_COLORS[0]);
   document.getElementById("overlay").classList.add("active");
   setTimeout(() => document.getElementById("input-desc").focus(), 150);
@@ -395,39 +375,38 @@ function openEdit(plan) {
   document.getElementById("overlay").classList.add("active");
 }
 
-document.getElementById("btn-save").onclick = () => {
+document.getElementById("btn-save").onclick = async () => {
   const desc = document.getElementById("input-desc").value.trim();
   const from = document.getElementById("input-from").value;
   const to   = document.getElementById("input-to").value;
   if (!desc || !from || !to) return;
-
   if (editingId) {
     const idx = PLANS.findIndex(p => p.id === editingId);
     if (idx >= 0) PLANS[idx] = { id: editingId, desc, from, to, color: selectedColor };
   } else {
     PLANS.push({ id: Date.now().toString(), desc, from, to, color: selectedColor });
   }
-
   document.getElementById("overlay").classList.remove("active");
   renderMonths();
+  await savePlans();
 };
 
 document.getElementById("btn-cancel").onclick = () => {
   document.getElementById("overlay").classList.remove("active");
 };
-
-document.getElementById("overlay").onclick = (e) => {
+document.getElementById("overlay").onclick = e => {
   if (e.target === document.getElementById("overlay"))
     document.getElementById("overlay").classList.remove("active");
 };
 
-function deletePlan(id) {
+async function deletePlan(id) {
   if (!confirm("Eintrag löschen?")) return;
   PLANS = PLANS.filter(p => p.id !== id);
   renderMonths();
+  await savePlans();
 }
 
-renderMonths();
+loadPlans();
 </script>
 </body>
 </html>
